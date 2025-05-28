@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Sistemas del Cuerpo Humano</title>
+  <style>
+    :root {
+      --primary-color: #2980b9;
+      --secondary-color: #27ae60;
+      --accent-color: #e74c3c;
+      --background-color: #121212;
+      --card-background: #1e1e1e;
+      --surface-color: #2c2c2c;
+      --text-color: #f0f0f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--background-color);
+      color: var(--text-color);
+      font-family: 'Arial', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .container { max-width: 700px; width: 100%; }
+    .quiz-header {
+      text-align: center;
+      margin-bottom: 1rem;
+      background: var(--card-background);
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .quiz-title {
+      font-size: 1.8rem;
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .quiz-stats {
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .stat-number { color: var(--primary-color); font-weight: bold; }
+
+    .card {
+      background: var(--card-background);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .question { font-size: 1.2rem; margin-bottom: 1rem; }
+    .options { display: grid; gap: 0.5rem; }
+    .option-button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--surface-color);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .option-button:hover {
+      background: var(--primary-color);
+      transform: translateY(-2px);
+    }
+    .option-button.correct { background: var(--secondary-color); }
+    .option-button.incorrect { background: var(--accent-color); }
+    .option-button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .feedback {
+      margin: 1rem 0;
+      padding: 0.5rem;
+      border-radius: 5px;
+      text-align: center;
+      display: none;
+    }
+    .feedback.correct { background: rgba(39, 174, 96, 0.2); color: var(--secondary-color); display: block; }
+    .feedback.incorrect { background: rgba(231, 76, 60, 0.2); color: var(--accent-color); display: block; }
+    .progress-bar {
+      height: 5px;
+      background: var(--surface-color);
+      border-radius: 3px;
+      margin-bottom: 1rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      transition: width 0.5s ease;
+    }
+    .completion-card { text-align: center; }
+    .completion-title { font-size: 1.5rem; color: var(--secondary-color); }
+
+    .selection-screen { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+    select {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      background: var(--surface-color);
+      color: var(--text-color);
+      border: 2px solid var(--primary-color);
+      width: 100%;
+      max-width: 250px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    select:hover { border-color: var(--secondary-color); }
+    select:focus { outline: none; border-color: var(--secondary-color); }
+    .difficulty-buttons { display: flex; gap: 0.5rem; }
+    .difficulty-button {
+      padding: 0.8rem 1rem;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .difficulty-button:hover {
+      background: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+    .difficulty-button.selected { background: var(--secondary-color); transform: scale(1.05); }
+    .start-button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .start-button:hover { transform: translateY(-2px); }
+    .restart-button {
+      padding: 0.8rem 1.5rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .restart-button:hover { transform: translateY(-2px); }
+
+    @media (max-width: 480px) {
+      .container { padding: 0.5rem; }
+      .quiz-title { font-size: 1.5rem; }
+      .question { font-size: 1rem; }
+      select, .difficulty-button, .start-button { font-size: 0.8rem; padding: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="quiz-header">
+      <h1 class="quiz-title">Quiz Sistemas del Cuerpo Humano</h1>
+      <div class="quiz-stats">
+        <div>Pregunta: <span class="stat-number" id="currentQuestionDisplay">1</span></div>
+        <div>Total: <span class="stat-number" id="totalQuestions">10</span></div>
+        <div>Correctas: <span class="stat-number" id="scoreDisplay">0</span></div>
+      </div>
+    </div>
+    <div class="card" id="quizCard">
+      <div class="selection-screen">
+        <select id="systemSelect">
+          <option value="">Selecciona un sistema</option>
+          <option value="circulatorio">Circulatorio</option>
+          <option value="digestivo">Digestivo</option>
+          <option value="endocrino">Endocrino</option>
+          <option value="esquelético">Esquelético</option>
+          <option value="muscular">Muscular</option>
+          <option value="nervioso">Nervioso</option>
+          <option value="reproductivo">Reproductivo</option>
+          <option value="respiratorio">Respiratorio</option>
+          <option value="sensorial">Sensorial</option>
+          <option value="tegumentario">Tegumentario</option>
+          <option value="inmunológico">Inmunológico</option>
+          <option value="urinario">Urinario</option>
+        </select>
+        <div class="difficulty-buttons">
+          <button class="difficulty-button selected" data-difficulty="easy">Fácil</button>
+          <button class="difficulty-button" data-difficulty="medium">Medio</button>
+          <button class="difficulty-button" data-difficulty="hard">Difícil</button>
+        </div>
+        <button class="start-button" onclick="startQuiz()">Iniciar Quiz</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const questionBank = {
+      circulatorio: [
+        { question: "¿Cuál es el órgano principal del sistema circulatorio?", options: ["Corazón", "Pulmón", "Riñón"], answer: "Corazón", difficulty: "easy" },
+        { question: "¿Qué transporta sangre desde el corazón?", options: ["Venas", "Arterias", "Capilares"], answer: "Arterias", difficulty: "easy" },
+        { question: "¿Qué componente transporta oxígeno?", options: ["Glóbulos blancos", "Glóbulos rojos", "Plaquetas"], answer: "Glóbulos rojos", difficulty: "easy" },
+        { question: "¿Qué vasos devuelven la sangre al corazón?", options: ["Arterias", "Venas", "Capilares"], answer: "Venas", difficulty: "medium" },
+        { question: "¿Qué válvula separa el corazón derecho del izquierdo?", options: ["Tricúspide", "Mitral", "Aórtica"], answer: "Mitral", difficulty: "medium" },
+        { question: "¿Qué célula ayuda en la coagulación?", options: ["Plaquetas", "Glóbulos rojos", "Leucocitos"], answer: "Plaquetas", difficulty: "medium" },
+        { question: "¿Qué tipo de sangre transportan las arterias pulmonares?", options: ["Oxigenada", "Desoxigenada", "Mixta"], answer: "Desoxigenada", difficulty: "medium" },
+        { question: "¿Qué cavidad recibe sangre oxigenada?", options: ["Aurícula izquierda", "Ventrículo derecho", "Aurícula derecha"], answer: "Aurícula izquierda", difficulty: "hard" },
+        { question: "¿Qué proteína transporta oxígeno en la sangre?", options: ["Hemoglobina", "Fibrina", "Albúmina"], answer: "Hemoglobina", difficulty: "hard" },
+        { question: "¿Qué sistema regula la presión arterial?", options: ["Renina-angiotensina", "Linfático", "Digestivo"], answer: "Renina-angiotensina", difficulty: "hard" }
+      ],
+      digestivo: [
+        { question: "¿Dónde comienza la digestión?", options: ["Boca", "Estómago", "Intestino"], answer: "Boca", difficulty: "easy" },
+        { question: "¿Qué produce el hígado para la digestión?", options: ["Bilis", "Insulina", "Enzimas"], answer: "Bilis", difficulty: "easy" },
+        { question: "¿Qué órgano almacena bilis?", options: ["Vesícula biliar", "Páncreas", "Estómago"], answer: "Vesícula biliar", difficulty: "easy" },
+        { question: "¿Qué ácido ayuda en la digestión estomacal?", options: ["Clorhídrico", "Sulfúrico", "Nítrico"], answer: "Clorhídrico", difficulty: "medium" },
+        { question: "¿Dónde se absorben la mayoría de los nutrientes?", options: ["Intestino delgado", "Intestino grueso", "Estómago"], answer: "Intestino delgado", difficulty: "medium" },
+        { question: "¿Qué enzima descompone proteínas?", options: ["Pepsina", "Lipasa", "Amilasa"], answer: "Pepsina", difficulty: "medium" },
+        { question: "¿Qué protege el estómago de autodigerirse?", options: ["Moco", "Bilis", "Enzimas"], answer: "Moco", difficulty: "medium" },
+        { question: "¿Qué estructura aumenta la superficie de absorción?", options: ["Vellosidades", "Criptas", "Pliegues"], answer: "Vellosidades", difficulty: "hard" },
+        { question: "¿Qué enzima descompone carbohidratos?", options: ["Amilasa", "Lipasa", "Pepsina"], answer: "Amilasa", difficulty: "hard" },
+        { question: "¿Qué hormona regula la secreción gástrica?", options: ["Gastrina", "Insulina", "Adrenalina"], answer: "Gastrina", difficulty: "hard" }
+      ],
+      endocrino: [
+        { question: "¿Qué órgano produce insulina?", options: ["Páncreas", "Tiroides", "Hígado"], answer: "Páncreas", difficulty: "easy" },
+        { question: "¿Qué glándula es la 'glándula maestra'?", options: ["Hipófisis", "Tiroides", "Suprarrenales"], answer: "Hipófisis", difficulty: "easy" },
+        { question: "¿Qué hormona regula el metabolismo?", options: ["Tiroxina", "Insulina", "Adrenalina"], answer: "Tiroxina", difficulty: "easy" },
+        { question: "¿Qué glándula produce adrenalina?", options: ["Suprarrenales", "Páncreas", "Hipófisis"], answer: "Suprarrenales", difficulty: "medium" },
+        { question: "¿Qué hormona regula el azúcar en sangre?", options: ["Insulina", "Glucagón", "Tiroxina"], answer: "Insulina", difficulty: "medium" },
+        { question: "¿Qué produce la glándula pineal?", options: ["Melatonina", "Cortisol", "Insulina"], answer: "Melatonina", difficulty: "medium" },
+        { question: "¿Qué hormona estimula el crecimiento?", options: ["Hormona del crecimiento", "Insulina", "Testosterona"], answer: "Hormona del crecimiento", difficulty: "medium" },
+        { question: "¿Qué regula el calcio en los huesos?", options: ["Parathormona", "Insulina", "Adrenalina"], answer: "Parathormona", difficulty: "hard" },
+        { question: "¿Qué hormona regula la ovulación?", options: ["Hormona luteinizante", "Prolactina", "Estrógeno"], answer: "Hormona luteinizante", difficulty: "hard" },
+        { question: "¿Qué regula el equilibrio de agua?", options: ["Hormona antidiurética", "Tiroxina", "Glucagón"], answer: "Hormona antidiurética", difficulty: "hard" }
+      ],
+      esquelético: [
+        { question: "¿Cuál es la función principal del esqueleto?", options: ["Soporte", "Digestión", "Respiración"], answer: "Soporte", difficulty: "easy" },
+        { question: "¿Qué protege el cerebro?", options: ["Cráneo", "Costillas", "Pelvis"], answer: "Cráneo", difficulty: "easy" },
+        { question: "¿Cuál es el hueso más largo?", options: ["Fémur", "Tibia", "Húmero"], answer: "Fémur", difficulty: "easy" },
+        { question: "¿Qué conecta hueso con hueso?", options: ["Ligamento", "Tendón", "Cartílago"], answer: "Ligamento", difficulty: "medium" },
+        { question: "¿Qué produce los glóbulos rojos?", options: ["Médula ósea", "Cartílago", "Periostio"], answer: "Médula ósea", difficulty: "medium" },
+        { question: "¿Qué tipo de articulación es la rodilla?", options: ["Sinovial", "Cartilaginosa", "Fibrosa"], answer: "Sinovial", difficulty: "medium" },
+        { question: "¿Qué hueso protege los pulmones?", options: ["Costillas", "Cráneo", "Pelvis"], answer: "Costillas", difficulty: "medium" },
+        { question: "¿Qué mineral fortalece los huesos?", options: ["Calcio", "Hierro", "Magnesio"], answer: "Calcio", difficulty: "hard" },
+        { question: "¿Qué tipo de hueso es el cráneo?", options: ["Plano", "Largo", "Corto"], answer: "Plano", difficulty: "hard" },
+        { question: "¿Qué protege la médula espinal?", options: ["Columna vertebral", "Cráneo", "Pelvis"], answer: "Columna vertebral", difficulty: "hard" }
+      ],
+      muscular: [
+        { question: "¿Qué tipo de músculo es el corazón?", options: ["Cardíaco", "Liso", "Esquelético"], answer: "Cardíaco", difficulty: "easy" },
+        { question: "¿Qué cubre los músculos?", options: ["Fascia", "Cartílago", "Piel"], answer: "Fascia", difficulty: "easy" },
+        { question: "¿Qué conecta el músculo al hueso?", options: ["Tendón", "Ligamento", "Cartílago"], answer: "Tendón", difficulty: "easy" },
+        { question: "¿Qué músculo permite la flexión del brazo?", options: ["Bíceps", "Tríceps", "Cuádriceps"], answer: "Bíceps", difficulty: "medium" },
+        { question: "¿Qué tipo de músculo es involuntario?", options: ["Liso", "Esquelético", "Cardíaco"], answer: "Liso", difficulty: "medium" },
+        { question: "¿Qué músculo extiende el brazo?", options: ["Tríceps", "Bíceps", "Deltoides"], answer: "Tríceps", difficulty: "medium" },
+        { question: "¿Qué músculo está en las piernas?", options: ["Cuádriceps", "Bíceps", "Deltoides"], answer: "Cuádriceps", difficulty: "medium" },
+        { question: "¿Qué proteína da fuerza a los músculos?", options: ["Actina", "Colágeno", "Queratina"], answer: "Actina", difficulty: "hard" },
+        { question: "¿Qué tipo de contracción es estática?", options: ["Isométrica", "Isotónica", "Excéntrica"], answer: "Isométrica", difficulty: "hard" },
+        { question: "¿Qué músculo está en la espalda?", options: ["Dorsal ancho", "Bíceps", "Pectoral"], answer: "Dorsal ancho", difficulty: "hard" }
+      ],
+      nervioso: [
+        { question: "¿Cuál es el órgano principal del sistema nervioso?", options: ["Cerebro", "Médula", "Nervios"], answer: "Cerebro", difficulty: "easy" },
+        { question: "¿Qué conecta el cerebro con el cuerpo?", options: ["Médula espinal", "Cerebelo", "Nervio óptico"], answer: "Médula espinal", difficulty: "easy" },
+        { question: "¿Qué célula transmite impulsos nerviosos?", options: ["Neurona", "Glía", "Axón"], answer: "Neurona", difficulty: "easy" },
+        { question: "¿Qué parte del cerebro controla el equilibrio?", options: ["Cerebelo", "Corteza", "Tálamo"], answer: "Cerebelo", difficulty: "medium" },
+        { question: "¿Qué protege el cerebro?", options: ["Meninges", "Cráneo", "Vértebras"], answer: "Meninges", difficulty: "medium" },
+        { question: "¿Qué transmite señales eléctricas?", options: ["Axón", "Dendrita", "Soma"], answer: "Axón", difficulty: "medium" },
+        { question: "¿Qué sustancia acelera la transmisión nerviosa?", options: ["Mielina", "Colágeno", "Queratina"], answer: "Mielina", difficulty: "medium" },
+        { question: "¿Qué regula las emociones?", options: ["Amígdala", "Tálamo", "Corteza"], answer: "Amígdala", difficulty: "hard" },
+        { question: "¿Qué controla las funciones involuntarias?", options: ["Tronco encefálico", "Cerebelo", "Corteza"], answer: "Tronco encefálico", difficulty: "hard" },
+        { question: "¿Qué conecta los hemisferios cerebrales?", options: ["Cuerpo calloso", "Tálamo", "Hipotálamo"], answer: "Cuerpo calloso", difficulty: "hard" }
+      ],
+      reproductivo: [
+        { question: "¿Dónde se desarrolla el feto?", options: ["Útero", "Ovarios", "Trompas"], answer: "Útero", difficulty: "easy" },
+        { question: "¿Dónde se producen los espermatozoides?", options: ["Testículos", "Próstata", "Epidídimo"], answer: "Testículos", difficulty: "easy" },
+        { question: "¿Qué produce la testosterona?", options: ["Testículos", "Ovarios", "Próstata"], answer: "Testículos", difficulty: "easy" },
+        { question: "¿Qué estructura transporta el óvulo?", options: ["Trompas de Falopio", "Útero", "Vagina"], answer: "Trompas de Falopio", difficulty: "medium" },
+        { question: "¿Qué hormona regula la ovulación?", options: ["Hormona luteinizante", "Progesterona", "Estrógeno"], answer: "Hormona luteinizante", difficulty: "medium" },
+        { question: "¿Qué produce estrógenos?", options: ["Ovarios", "Testículos", "Próstata"], answer: "Ovarios", difficulty: "medium" },
+        { question: "¿Qué glándula produce líquido seminal?", options: ["Próstata", "Testículos", "Vesículas seminales"], answer: "Vesículas seminales", difficulty: "medium" },
+        { question: "¿Qué hormona mantiene el embarazo?", options: ["Progesterona", "Estrógeno", "Oxitocina"], answer: "Progesterona", difficulty: "hard" },
+        { question: "¿Qué estructura protege al feto?", options: ["Placenta", "Útero", "Amnios"], answer: "Placenta", difficulty: "hard" },
+        { question: "¿Qué transporta espermatozoides al exterior?", options: ["Conducto deferente", "Uretra", "Epidídimo"], answer: "Conducto deferente", difficulty: "hard" }
+      ],
+      respiratorio: [
+        { question: "¿Dónde ocurre el intercambio de gases?", options: ["Alveolos", "Bronquios", "Tráquea"], answer: "Alveolos", difficulty: "easy" },
+        { question: "¿Cuál es el músculo principal de la respiración?", options: ["Diafragma", "Pectoral", "Intercostal"], answer: "Diafragma", difficulty: "easy" },
+        { question: "¿Por dónde entra el aire?", options: ["Fosas nasales", "Boca", "Tráquea"], answer: "Fosas nasales", difficulty: "easy" },
+        { question: "¿Qué estructura filtra el aire?", options: ["Cilios", "Alveolos", "Bronquios"], answer: "Cilios", difficulty: "medium" },
+        { question: "¿Qué protege los pulmones?", options: ["Pleura", "Pericardio", "Diafragma"], answer: "Pleura", difficulty: "medium" },
+        { question: "¿Qué conecta la tráquea con los pulmones?", options: ["Bronquios", "Alveolos", "Laringe"], answer: "Bronquios", difficulty: "medium" },
+        { question: "¿Qué regula la entrada de aire?", options: ["Epiglotis", "Laringe", "Faringe"], answer: "Epiglotis", difficulty: "medium" },
+        { question: "¿Qué produce el sonido al hablar?", options: ["Cuerdas vocales", "Laringe", "Faringe"], answer: "Cuerdas vocales", difficulty: "hard" },
+        { question: "¿Qué elimina al exhalar?", options: ["Dióxido de carbono", "Oxígeno", "Nitrógeno"], answer: "Dióxido de carbono", difficulty: "hard" },
+        { question: "¿Qué regula la respiración?", options: ["Tronco encefálico", "Cerebelo", "Corteza"], answer: "Tronco encefálico", difficulty: "hard" }
+      ],
+      sensorial: [
+        { question: "¿Qué órgano es responsable del gusto?", options: ["Lengua", "Nariz", "Ojos"], answer: "Lengua", difficulty: "easy" },
+        { question: "¿Qué órgano es responsable de la visión?", options: ["Ojos", "Oídos", "Nariz"], answer: "Ojos", difficulty: "easy" },
+        { question: "¿Qué detecta el sonido?", options: ["Oído", "Nariz", "Lengua"], answer: "Oído", difficulty: "easy" },
+        { question: "¿Qué parte del ojo enfoca la luz?", options: ["Cristalino", "Córnea", "Pupila"], answer: "Cristalino", difficulty: "medium" },
+        { question: "¿Qué estructura detecta olores?", options: ["Mucosa olfatoria", "Papilas gustativas", "Córnea"], answer: "Mucosa olfatoria", difficulty: "medium" },
+        { question: "¿Qué parte del ojo percibe la luz?", options: ["Retina", "Iris", "Esclerótica"], answer: "Retina", difficulty: "medium" },
+        { question: "¿Qué hueso amplifica el sonido?", options: ["Martillo", "Yunque", "Estribo"], answer: "Martillo", difficulty: "medium" },
+        { question: "¿Qué detecta el dolor?", options: ["Nociceptores", "Fotoreceptores", "Mecanorreceptores"], answer: "Nociceptores", difficulty: "hard" },
+        { question: "¿Qué regula la entrada de luz al ojo?", options: ["Iris", "Pupila", "Córnea"], answer: "Iris", difficulty: "hard" },
+        { question: "¿Qué parte del oído equilibra el cuerpo?", options: ["Canales semicirculares", "Cóclea", "Tímpano"], answer: "Canales semicirculares", difficulty: "hard" }
+      ],
+      tegumentario: [
+        { question: "¿Cuál es la capa más externa de la piel?", options: ["Epidermis", "Dermis", "Hipodermis"], answer: "Epidermis", difficulty: "easy" },
+        { question: "¿Qué protegen las uñas?", options: ["Yemas de los dedos", "Huesos", "Músculos"], answer: "Yemas de los dedos", difficulty: "easy" },
+        { question: "¿Qué produce el sudor?", options: ["Glándulas sudoríparas", "Glándulas sebáceas", "Folículos"], answer: "Glándulas sudoríparas", difficulty: "easy" },
+        { question: "¿Qué contiene los vasos sanguíneos de la piel?", options: ["Dermis", "Epidermis", "Hipodermis"], answer: "Dermis", difficulty: "medium" },
+        { question: "¿Qué protege contra rayos UV?", options: ["Melanina", "Queratina", "Colágeno"], answer: "Melanina", difficulty: "medium" },
+        { question: "¿Qué produce el sebo?", options: ["Glándulas sebáceas", "Glándulas sudoríparas", "Folículos"], answer: "Glándulas sebáceas", difficulty: "medium" },
+        { question: "¿Qué forma las uñas?", options: ["Queratina", "Melanina", "Colágeno"], answer: "Queratina", difficulty: "medium" },
+        { question: "¿Qué célula produce pigmento?", options: ["Melanocito", "Queratinocito", "Fibroblasto"], answer: "Melanocito", difficulty: "hard" },
+        { question: "¿Qué regula la temperatura corporal?", options: ["Sudor", "Sebo", "Melanina"], answer: "Sudor", difficulty: "hard" },
+        { question: "¿Qué capa almacena grasa?", options: ["Hipodermis", "Dermis", "Epidermis"], answer: "Hipodermis", difficulty: "hard" }
+      ],
+      inmunológico: [
+        { question: "¿Cuál es la función del sistema linfático?", options: ["Defensa", "Circulación", "Digestión"], answer: "Defensa", difficulty: "easy" },
+        { question: "¿Qué células combaten infecciones?", options: ["Glóbulos blancos", "Plaquetas", "Eritrocitos"], answer: "Glóbulos blancos", difficulty: "easy" },
+        { question: "¿Qué órgano produce linfocitos?", options: ["Timo", "Hígado", "Páncreas"], answer: "Timo", difficulty: "easy" },
+        { question: "¿Qué produce anticuerpos?", options: ["Linfocitos B", "Linfocitos T", "Neutrófilos"], answer: "Linfocitos B", difficulty: "medium" },
+        { question: "¿Qué órgano filtra la linfa?", options: ["Ganglios linfáticos", "Bazo", "Timo"], answer: "Ganglios linfáticos", difficulty: "medium" },
+        { question: "¿Qué elimina patógenos de la sangre?", options: ["Bazo", "Timo", "Hígado"], answer: "Bazo", difficulty: "medium" },
+        { question: "¿Qué célula fagocita patógenos?", options: ["Macrófagos", "Linfocitos", "Plaquetas"], answer: "Macrófagos", difficulty: "medium" },
+        { question: "¿Qué célula ataca virus?", options: ["Linfocitos T", "Neutrófilos", "Macrófagos"], answer: "Linfocitos T", difficulty: "hard" },
+        { question: "¿Qué produce la fiebre?", options: ["Citoquinas", "Hormonas", "Enzimas"], answer: "Citoquinas", difficulty: "hard" },
+        { question: "¿Qué líquido transporta linfocitos?", options: ["Linfa", "Sangre", "Plasma"], answer: "Linfa", difficulty: "hard" }
+      ],
+      urinario: [
+        { question: "¿Qué hacen los riñones?", options: ["Filtrar sangre", "Producir bilis", "Digerir"], answer: "Filtrar sangre", difficulty: "easy" },
+        { question: "¿Qué transporta orina a la vejiga?", options: ["Uréter", "Uretra", "Nefrón"], answer: "Uréter", difficulty: "easy" },
+        { question: "¿Qué almacena la orina?", options: ["Vejiga", "Riñón", "Uréter"], answer: "Vejiga", difficulty: "easy" },
+        { question: "¿Qué elimina orina del cuerpo?", options: ["Uretra", "Uréter", "Vejiga"], answer: "Uretra", difficulty: "medium" },
+        { question: "¿Qué unidad filtra la sangre?", options: ["Nefrón", "Uréter", "Glomérulo"], answer: "Nefrón", difficulty: "medium" },
+        { question: "¿Qué regula el equilibrio de agua?", options: ["Riñones", "Hígado", "Páncreas"], answer: "Riñones", difficulty: "medium" },
+        { question: "¿Qué hormona regula la reabsorción de agua?", options: ["Hormona antidiurética", "Insulina", "Aldosterona"], answer: "Hormona antidiurética", difficulty: "medium" },
+        { question: "¿Qué estructura filtra desechos?", options: ["Glomérulo", "Uréter", "Vejiga"], answer: "Glomérulo", difficulty: "hard" },
+        { question: "¿Qué regula la presión arterial?", options: ["Renina", "Insulina", "Adrenalina"], answer: "Renina", difficulty: "hard" },
+        { question: "¿Qué produce eritropoyetina?", options: ["Riñones", "Hígado", "Bazo"], answer: "Riñones", difficulty: "hard" }
+      ]
+    };
+
+    let currentQuestion = 0;
+    let score = 0;
+    let questions = [];
+    let selectedDifficulty = 'easy';
+
+    function selectDifficulty(difficulty) {
+      selectedDifficulty = difficulty;
+      document.querySelectorAll('.difficulty-button').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.difficulty === difficulty);
+      });
+    }
+
+    function startQuiz() {
+      const system = document.getElementById('systemSelect').value;
+      if (!system) return alert('Por favor, selecciona un sistema.');
+      questions = questionBank[system].filter(q => q.difficulty === selectedDifficulty);
+      if (questions.length < 10) questions = questionBank[system].slice(); // Use all if not enough
+      questions = questions.sort(() => Math.random() - 0.5).slice(0, 10);
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById('scoreDisplay').textContent = score;
+      document.getElementById('totalQuestions').textContent = questions.length;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (currentQuestion >= questions.length) {
+        showCompletion();
+        return;
+      }
+      const q = questions[currentQuestion];
+      document.getElementById('quizCard').innerHTML = `
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${(currentQuestion / questions.length) * 100}%"></div>
+        </div>
+        <div class="question">${q.question}</div>
+        <div class="options"></div>
+        <div class="feedback" id="feedback"></div>
+      `;
+      document.getElementById('currentQuestionDisplay').textContent = currentQuestion + 1;
+      const optionsDiv = document.querySelector('.options');
+      q.options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'option-button';
+        button.textContent = option;
+        button.onclick = () => checkAnswer(option, button);
+        optionsDiv.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selected, button) {
+      const correct = questions[currentQuestion].answer;
+      const feedback = document.getElementById('feedback');
+      document.querySelectorAll('.option-button').forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === correct) btn.classList.add('correct');
+        else if (btn === button) btn.classList.add('incorrect');
+      });
+      feedback.textContent = selected === correct ? '¡Correcto!' : `Incorrecto. Respuesta: ${correct}`;
+      feedback.className = `feedback ${selected === correct ? 'correct' : 'incorrect'}`;
+      if (selected === correct) score++;
+      document.getElementById('scoreDisplay').textContent = score;
+      setTimeout(() => {
+        currentQuestion++;
+        showQuestion();
+      }, 1000);
+    }
+
+    function showCompletion() {
+      const percentage = Math.round((score / questions.length) * 100);
+      const message = percentage >= 80 ? '¡Excelente!' : percentage >= 60 ? '¡Bien!' : '¡Sigue practicando!';
+      document.getElementById('quizCard').innerHTML = `
+        <div class="completion-card">
+          <div class="completion-title">${message}</div>
+          <div>Puntuación: ${score}/${questions.length} (${percentage}%)</div>
+          <button class="restart-button" onclick="restartQuiz()">Reiniciar Quiz</button>
+        </div>
+      `;
+    }
+
+    function restartQuiz() {
+      document.getElementById('quizCard').innerHTML = `
+        <div class="selection-screen">
+          <select id="systemSelect">
+            <option value="">Selecciona un sistema</option>
+            <option value="circulatorio">Circulatorio</option>
+            <option value="digestivo">Digestivo</option>
+            <option value="endocrino">Endocrino</option>
+            <option value="esquelético">Esquelético</option>
+            <option value="muscular">Muscular</option>
+            <option value="nervioso">Nervioso</option>
+            <option value="reproductivo">Reproductivo</option>
+            <option value="respiratorio">Respiratorio</option>
+            <option value="sensorial">Sensorial</option>
+            <option value="tegumentario">Tegumentario</option>
+            <option value="inmunológico">Inmunológico</option>
+            <option value="urinario">Urinario</option>
+          </select>
+          <div class="difficulty-buttons">
+            <button class="difficulty-button selected" data-difficulty="easy" onclick="selectDifficulty('easy')">Fácil</button>
+            <button class="difficulty-button" data-difficulty="medium" onclick="selectDifficulty('medium')">Medio</button>
+            <button class="difficulty-button" data-difficulty="hard" onclick="selectDifficulty('hard')">Difícil</button>
+          </div>
+          <button class="start-button" onclick="startQuiz()">Iniciar Quiz</button>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.difficulty-button').forEach(btn => {
+        btn.onclick = () => selectDifficulty(btn.dataset.difficulty);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards - Sistemas del Cuerpo Humano</title>
+  <style>
+    :root {
+      --primary-color: #2980b9;
+      --primary-color-dark: #1c638b;
+      --secondary-color: #27ae60;
+      --accent-color: #e74c3c;
+      --background-color: #0f0f23;
+      --card-background: #1a1a2e;
+      --surface-color: #16213e;
+      --text-color: #f0f0f0;
+      --text-secondary: #aaaaaa;
+      --card-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--background-color), #0a0a1a);
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Fondo animado */
+    .background-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, rgba(41, 128, 185, 0.1), rgba(39, 174, 96, 0.1));
+      animation: float 20s infinite ease-in-out;
+      filter: blur(1px);
+    }
+
+    .floating-shape:nth-child(1) { width: 200px; height: 200px; top: 10%; left: 10%; animation-delay: 0s; }
+    .floating-shape:nth-child(2) { width: 150px; height: 150px; top: 60%; right: 15%; animation-delay: -7s; }
+    .floating-shape:nth-child(3) { width: 100px; height: 100px; bottom: 20%; left: 20%; animation-delay: -14s; }
+    .floating-shape:nth-child(4) { width: 120px; height: 120px; top: 30%; right: 30%; animation-delay: -3s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-20px) rotate(90deg); }
+      50% { transform: translateY(-10px) rotate(180deg); }
+      75% { transform: translateY(-30px) rotate(270deg); }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, var(--card-background), var(--surface-color));
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-color);
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat {
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-number {
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      font-weight: bold;
+      color: var(--primary-color);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
+    }
+
+    .flashcard-container {
+      perspective: 1000px;
+      height: 400px;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .flashcard {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, var(--card-background), var(--surface-color));
+      color: var(--text-color);
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, var(--secondary-color), #229954);
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    .card-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .question-text {
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      line-height: 1.4;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .answer-text {
+      font-size: clamp(1.4rem, 3.5vw, 1.8rem);
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .system-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .card-hint {
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+      color: white;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--surface-color), var(--card-background));
+      color: var(--text-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--secondary-color), #229954);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-color), #c0392b);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .progress-container {
+      background: var(--surface-color);
+      padding: 1rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--card-background);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      transition: width 0.5s ease;
+      border-radius: 4px;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      padding: 0.6rem 1.2rem;
+      border: 2px solid var(--primary-color);
+      background: transparent;
+      color: var(--primary-color);
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(41, 128, 185, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    .mode-btn:active::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .mode-btn.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .completion-message {
+      text-align: center;
+      background: linear-gradient(135deg, var(--card-background), var(--surface-color));
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .completion-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--secondary-color);
+      margin-bottom: 1rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .flashcard-container {
+        height: 350px;
+      }
+      
+      .card-side {
+        padding: 1.5rem;
+      }
+      
+      .controls {
+        gap: 0.5rem;
+      }
+      
+      .btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+      }
+      
+      .stats-bar {
+        padding: 0.8rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      .flashcard-container {
+        height: 300px;
+      }
+      
+      .header {
+        padding: 1.5rem;
+      }
+      
+      .card-side {
+        padding: 1rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flashcard {
+        transition: none;
+      }
+      
+      .floating-shape {
+        animation: none;
+      }
+      
+      .btn:hover {
+        transform: none;
+      }
+    }
+
+    /* Sound toggle button */
+    .sound-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--surface-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .sound-toggle:hover {
+      background: var(--primary-color);
+      transform: scale(1.1);
+    }
+
+    .sound-toggle.muted {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="sound-toggle" id="soundToggle" title="Activar/Desactivar sonidos">
+    🔊
+  </div>
+
+  <div class="background-animation">
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🧠 Flashcards Interactivas</h1>
+      <p>Sistemas del Cuerpo Humano</p>
+    </div>
+
+    <div class="mode-selector">
+      <button class="mode-btn active" data-mode="all">Todos los Sistemas</button>
+      <button class="mode-btn" data-mode="circulatorio">Circulatorio</button>
+      <button class="mode-btn" data-mode="digestivo">Digestivo</button>
+      <button class="mode-btn" data-mode="nervioso">Nervioso</button>
+      <button class="mode-btn" data-mode="respiratorio">Respiratorio</button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-number" id="currentCard">1</div>
+        <div class="stat-label">Tarjeta</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="totalCards">25</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="studiedCards">0</div>
+        <div class="stat-label">Estudiadas</div>
+      </div>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">0% completado</div>
+    </div>
+
+    <div class="flashcard-container" id="flashcardContainer">
+      <div class="flashcard" id="flashcard">
+        <div class="card-side card-front">
+          <div class="card-content">
+            <div class="system-tag" id="systemTag">Sistema Circulatorio</div>
+            <div class="question-text" id="questionText">¿Cuál es el órgano principal del sistema circulatorio?</div>
+            <div class="card-hint">Haz clic para ver la respuesta</div>
+          </div>
+        </div>
+        <div class="card-side card-back">
+          <div class="card-content">
+            <div class="system-tag">Respuesta</div>
+            <div class="answer-text" id="answerText">Corazón</div>
+            <div class="card-hint">Haz clic para volver a la pregunta</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-danger" id="prevBtn">⬅ Anterior</button>
+      <button class="btn btn-secondary" id="flipBtn">🔄 Voltear</button>
+      <button class="btn btn-success" id="nextBtn">Siguiente ➡</button>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="shuffleBtn">🎲 Mezclar</button>
+      <button class="btn btn-secondary" id="resetBtn">🔄 Reiniciar</button>
+    </div>
+
+    <div class="completion-message" id="completionMessage" style="display: none;">
+      <div class="completion-title">🎉 ¡Felicitaciones!</div>
+      <p>Has completado todas las flashcards. ¡Excelent trabajo estudiando los sistemas del cuerpo humano!</p>
+      <button class="btn btn-primary" id="restartBtn" style="margin-top: 1rem;">Empezar otra vez</button>
+    </div>
+  </div>
+
+  <script>
+    const flashcards = [
+      // Sistema Circulatorio
+      { question: "¿Cuál es el órgano principal del sistema circulatorio?", answer: "Corazón", system: "Sistema Circulatorio", category: "circulatorio" },
+      { question: "¿Qué estructura transporta la sangre desde el corazón al resto del cuerpo?", answer: "Arterias", system: "Sistema Circulatorio", category: "circulatorio" },
+      { question: "¿Cuál es la función principal de los glóbulos rojos?", answer: "Transportar oxígeno", system: "Sistema Circulatorio", category: "circulatorio" },
+      
+      // Sistema Digestivo
+      { question: "¿Dónde comienza la digestión de los alimentos?", answer: "Boca", system: "Sistema Digestivo", category: "digestivo" },
+      { question: "¿Cuál es la función principal del hígado en la digestión?", answer: "Producir bilis", system: "Sistema Digestivo", category: "digestivo" },
+      
+      // Sistema Endocrino
+      { question: "¿Qué órgano produce la insulina en el cuerpo?", answer: "Páncreas", system: "Sistema Endocrino", category: "endocrino" },
+      { question: "¿Cuál es conocida como la 'glándula maestra' del sistema endocrino?", answer: "Hipófisis", system: "Sistema Endocrino", category: "endocrino" },
+      
+      // Sistema Esquelético
+      { question: "¿Cuál es la función principal del esqueleto?", answer: "Protección y soporte", system: "Sistema Esquelético", category: "esqueletico" },
+      { question: "¿Cuál es el hueso más largo del cuerpo humano?", answer: "Fémur", system: "Sistema Esquelético", category: "esqueletico" },
+      { question: "¿Qué estructura protege al cerebro?", answer: "Cráneo", system: "Sistema Esquelético", category: "esqueletico" },
+      
+      // Sistema Muscular
+      { question: "¿Qué tipo de músculo es el corazón?", answer: "Músculo cardíaco", system: "Sistema Muscular", category: "muscular" },
+      { question: "¿Qué cubre y protege a los músculos?", answer: "Fascias", system: "Sistema Muscular", category: "muscular" },
+      
+      // Sistema Nervioso
+      { question: "¿Cuál es el órgano principal del sistema nervioso?", answer: "Cerebro", system: "Sistema Nervioso", category: "nervioso" },
+      { question: "¿Qué estructura conecta el cerebro con el resto del cuerpo?", answer: "Médula espinal", system: "Sistema Nervioso", category: "nervioso" },
+      
+      // Sistema Reproductivo
+      { question: "¿Dónde se desarrolla el feto en el aparato reproductor femenino?", answer: "Útero", system: "Sistema Reproductivo", category: "reproductivo" },
+      { question: "¿Dónde se producen los espermatozoides en el aparato reproductor masculino?", answer: "Testículos", system: "Sistema Reproductivo", category: "reproductivo" },
+      
+      // Sistema Respiratorio
+      { question: "¿Dónde ocurre el intercambio de gases en los pulmones?", answer: "Alveolos", system: "Sistema Respiratorio", category: "respiratorio" },
+      { question: "¿Cuál es el músculo principal de la respiración?", answer: "Diafragma", system: "Sistema Respiratorio", category: "respiratorio" },
+      { question: "¿Por dónde entra el aire al sistema respiratorio?", answer: "Fosas nasales", system: "Sistema Respiratorio", category: "respiratorio" },
+      
+      // Sistema Sensorial
+      { question: "¿Qué órgano es responsable del sentido del gusto?", answer: "Lengua", system: "Sistema Sensorial", category: "sensorial" },
+      { question: "¿Cuál es el órgano de la visión?", answer: "Ojos", system: "Sistema Sensorial", category: "sensorial" },
+      
+      // Sistema Tegumentario
+      { question: "¿Cuál es la capa más externa de la piel?", answer: "Epidermis", system: "Sistema Tegumentario", category: "tegumentario" },
+      { question: "¿Qué protegen principalmente las uñas?", answer: "Las yemas de los dedos", system: "Sistema Tegumentario", category: "tegumentario" },
+      
+      // Sistema Inmunológico y Linfático
+      { question: "¿Cuál es la función principal del sistema linfático?", answer: "Defensa del organismo", system: "Sistema Linfático", category: "linfatico" },
+      
+      // Sistema Urinario
+      { question: "¿Cuál es la función principal de los riñones?", answer: "Filtrar la sangre y producir orina", system: "Sistema Urinario", category: "urinario" }
+    ];
+
+    let currentIndex = 0;
+    let studiedCards = new Set();
+    let currentMode = 'all';
+    let filteredCards = [...flashcards];
+    let isFlipped = false;
+    let soundEnabled = true;
+    let audioContext = null;
+
+    // Elementos del DOM
+    const flashcard = document.getElementById('flashcard');
+    const questionText = document.getElementById('questionText');
+    const answerText = document.getElementById('answerText');
+    const systemTag = document.getElementById('systemTag');
+    const currentCardEl = document.getElementById('currentCard');
+    const totalCardsEl = document.getElementById('totalCards');
+    const studiedCardsEl = document.getElementById('studiedCards');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const completionMessage = document.getElementById('completionMessage');
+    const flashcardContainer = document.getElementById('flashcardContainer');
+    const soundToggle = document.getElementById('soundToggle');
+
+    // Botones
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const flipBtn = document.getElementById('flipBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+
+    // Inicializar Audio Context
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioContext;
+    }
+
+    // Crear sonido de click usando Web Audio API
+    function createClickSound(frequency = 800, duration = 0.1, volume = 0.3) {
+      if (!soundEnabled) return;
+      
+      try {
+        const ctx = initAudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + duration);
+      } catch (error) {
+        console.log('Audio no disponible');
+      }
+    }
+
+    // Crear sonido de flip (voltear tarjeta)
+    function createFlipSound() {
+      if (!soundEnabled) return;
+      
+      try {
+        const ctx = initAudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.1);
+        oscillator.type = 'triangle';
+        
+        gainNode.gain.setValueAtTime(0, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.2);
+      } catch (error) {
+        console.log('Audio no disponible');
+      }
+    }
+
+    // Crear sonido de éxito
+    function createSuccessSound() {
+      if (!soundEnabled) return;
+      
+      try {
+        const ctx = initAudioContext();
+        const frequencies = [523, 659, 784]; // Do, Mi, Sol
+        
+        frequencies.forEach((freq, index) => {
+          const oscillator = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          
+          oscillator.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.1);
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0, ctx.currentTime + index * 0.1);
+          gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + index * 0.1 + 0.01);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.1 + 0.3);
+          
+          oscillator.start(ctx.currentTime + index * 0.1);
+          oscillator.stop(ctx.currentTime + index * 0.1 + 0.3);
+        });
+      } catch (error) {
+        console.log('Audio no disponible');
+      }
+    }
+
+    // Toggle de sonido
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+      soundToggle.classList.toggle('muted', !soundEnabled);
+      
+      if (soundEnabled) {
+        createClickSound(1000, 0.1, 0.2);
+      }
+    }
+
+    function updateCard() {
+      const card = filteredCards[currentIndex];
+      if (!card) return;
+
+      questionText.textContent = card.question;
+      answerText.textContent = card.answer;
+      systemTag.textContent = card.system;
+      
+      if (isFlipped) {
+        flashcard.classList.add('flipped');
+      } else {
+        flashcard.classList.remove('flipped');
+      }
+
+      updateStats();
+    }
+
+    function updateStats() {
+      currentCardEl.textContent = currentIndex + 1;
+      totalCardsEl.textContent = filteredCards.length;
+      studiedCardsEl.textContent = studiedCards.size;
+      
+      const progress = (studiedCards.size / filteredCards.length) * 100;
+      progressFill.style.width = progress + '%';
+      progressText.textContent = Math.round(progress) + '% completado';
+
+      // Verificar si se completaron todas las tarjetas
+      if (studiedCards.size === filteredCards.length && filteredCards.length > 0) {
+        setTimeout(() => {
+          flashcardContainer.style.display = 'none';
+          completionMessage.style.display = 'block';
+          createSuccessSound();
+        }, 500);
+      }
+    }
+
+    function flipCard() {
+      isFlipped = !isFlipped;
+      if (isFlipped) {
+        flashcard.classList.add('flipped');
+        studiedCards.add(currentIndex);
+      } else {
+        flashcard.classList.remove('flipped');
+      }
+      createFlipSound();
+      updateStats();
+    }
+
+    function nextCard() {
+      if (currentIndex < filteredCards.length - 1) {
+        currentIndex++;
+      } else {
+        currentIndex = 0;
+      }
+      isFlipped = false;
+      createClickSound(900, 0.08, 0.25);
+      updateCard();
+    }
+
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+      } else {
+        currentIndex = filteredCards.length - 1;
+      }
+      isFlipped = false;
+      createClickSound(700, 0.08, 0.25);
+      updateCard();
+    }
+
+    function shuffleCards() {
+      for (let i = filteredCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+      }
+      currentIndex = 0;
+      isFlipped = false;
+      studiedCards.clear();
+      createClickSound(1000, 0.12, 0.3);
+      updateCard();
+    }
+
+    function resetProgress() {
+      studiedCards.clear();
+      currentIndex = 0;
+      isFlipped = false;
+      flashcardContainer.style.display = 'block';
+      completionMessage.style.display = 'none';
+      createClickSound(600, 0.1, 0.25);
+      updateCard();
+    }
+
+    function filterByMode(mode) {
+      currentMode = mode;
+      
+      // Actualizar botones de modo
+      modeBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.mode === mode) {
+          btn.classList.add('active');
+        }
+      });
+
+      // Filtrar tarjetas
+      if (mode === 'all') {
+        filteredCards = [...flashcards];
+      } else {
+        filteredCards = flashcards.filter(card => card.category === mode);
+      }
+
+      // Reiniciar estado
+      currentIndex = 0;
+      isFlipped = false;
+      studiedCards.clear();
+      flashcardContainer.style.display = 'block';
+      completionMessage.style.display = 'none';
+      createClickSound(850, 0.1, 0.25);
+      updateCard();
+    }
+
+    // Event listeners con sonidos
+    flashcard.addEventListener('click', flipCard);
+    flipBtn.addEventListener('click', flipCard);
+    
+    nextBtn.addEventListener('click', nextCard);
+    prevBtn.addEventListener('click', prevCard);
+    shuffleBtn.addEventListener('click', shuffleCards);
+    resetBtn.addEventListener('click', resetProgress);
+    restartBtn.addEventListener('click', resetProgress);
+    soundToggle.addEventListener('click', toggleSound);
+
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterByMode(btn.dataset.mode);
+      });
+    });
+
+    // Añadir efectos de sonido a todos los botones
+    document.querySelectorAll('.btn, .mode-btn').forEach(button => {
+      button.addEventListener('mousedown', () => {
+        if (button.classList.contains('btn-primary')) {
+          createClickSound(1000, 0.1, 0.3);
+        } else if (button.classList.contains('btn-success')) {
+          createClickSound(880, 0.1, 0.3);
+        } else if (button.classList.contains('btn-danger')) {
+          createClickSound(660, 0.1, 0.3);
+        } else if (button.classList.contains('mode-btn')) {
+          createClickSound(750, 0.08, 0.25);
+        } else {
+          createClickSound(800, 0.1, 0.25);
+        }
+      });
+    });
+
+    // Controles de teclado
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowLeft':
+          prevCard();
+          break;
+        case 'ArrowRight':
+          nextCard();
+          break;
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          flipCard();
+          break;
+        case 'r':
+          shuffleCards();
+          break;
+        case 'm':
+          toggleSound();
+          break;
+      }
+    });
+
+    // Gestos táctiles básicos
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    flashcard.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    flashcard.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+      
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          nextCard(); // Swipe left - next card
+        } else {
+          prevCard(); // Swipe right - previous card
+        }
+      }
+    }
+
+    // Inicializar audio context en la primera interacción del usuario
+    document.addEventListener('click', () => {
+      if (!audioContext) {
+        initAudioContext();
+      }
+    }, { once: true });
+
+  </script>
+</body>
+</html>

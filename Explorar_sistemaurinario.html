@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AR Anatomía - Sistema Digestivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --primary: #2ecc71;
+      --secondary: #3498db;
+      --accent: #fdd835;
+      --bg-dark: #121212;
+      --bg-light: #ffffff;
+      --card-dark: #1e1e1e;
+      --card-light: #f9f9f9;
+      --text-dark: #f5f5f5;
+      --text-light: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Poppins, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-dark);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    body.light-theme {
+      background: var(--bg-light);
+      color: var(--text-light);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: rgba(0, 0, 0, 0.7);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    body.light-theme .header {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .logo {
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      font-weight: 600;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+    }
+
+    .back {
+      color: inherit;
+      text-decoration: none;
+      font-size: clamp(0.8rem, 3vw, 1rem);
+      white-space: nowrap;
+    }
+
+    #themeToggleSmall {
+      font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+      padding: 6px 12px;
+      white-space: nowrap;
+    }
+
+    .main {
+      padding: 80px 15px 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .main h1 {
+      font-size: clamp(1.8rem, 6vw, 2.5rem);
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      word-wrap: break-word;
+    }
+
+    .info-card {
+      background: var(--card-dark);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      margin: 15px 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.light-theme .info-card {
+      background: var(--card-light);
+      color: var(--text-light);
+    }
+
+    .info-card h2 {
+      margin-bottom: 10px;
+      color: var(--accent);
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+    }
+
+    .info-card p {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      line-height: 1.5;
+    }
+
+    .model-container {
+      position: relative;
+      width: 100%;
+      height: clamp(300px, 50vh, 500px);
+      margin-bottom: 20px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Burbuja flotante informativa */
+    .info-bubble {
+      position: absolute;
+      top: clamp(20%, 30vh, 40%);
+      left: clamp(5px, 2vw, 15px);
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 18px);
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 
+                  0 4px 15px rgba(0, 0, 0, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      max-width: clamp(180px, 40vw, 250px);
+      z-index: 10;
+      animation: float 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .info-bubble::after {
+      content: '';
+      position: absolute;
+      right: clamp(-8px, -2vw, -12px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: clamp(10px, 2.5vw, 15px) solid rgba(0, 0, 0, 0.85);
+      border-top: clamp(6px, 1.5vw, 10px) solid transparent;
+      border-bottom: clamp(6px, 1.5vw, 10px) solid transparent;
+      filter: drop-shadow(2px 0 3px rgba(0, 0, 0, 0.3));
+    }
+
+    .info-bubble::before {
+      content: '';
+      position: absolute;
+      right: clamp(-6px, -1.5vw, -10px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: clamp(8px, 2vw, 13px) solid rgba(255, 255, 255, 0.2);
+      border-top: clamp(5px, 1.2vw, 8px) solid transparent;
+      border-bottom: clamp(5px, 1.2vw, 8px) solid transparent;
+      z-index: -1;
+    }
+
+    .info-bubble:hover {
+      transform: scale(1.05);
+    }
+
+    .info-bubble h3 {
+      margin: 0 0 6px 0;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      font-weight: 600;
+    }
+
+    .info-bubble p {
+      margin: 0;
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      line-height: 1.3;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .btn {
+      padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+      margin: 5px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      font-weight: 500;
+      transition: background 0.3s, color 0.3s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: fit-content;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn i {
+      font-size: clamp(0.8rem, 2vw, 1rem);
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: #fff;
+    }
+
+    .btn-audio {
+      background: var(--accent);
+      color: black;
+    }
+
+    .btn-info {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .btn-ar {
+      background: linear-gradient(45deg, var(--secondary), var(--primary));
+      color: white;
+    }
+
+    .audio-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 10px;
+    }
+
+    .audio-container audio {
+      display: none;
+    }
+
+    /* Panel de información desplegable */
+    .info-panel {
+      display: none;
+      background: var(--card-dark);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: slideDown 0.4s ease-out;
+      transition: background 0.3s, color 0.3s;
+      text-align: left;
+    }
+
+    body.light-theme .info-panel {
+      background: var(--card-light);
+      color: var(--text-light);
+    }
+
+    .info-panel.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from { 
+        opacity: 0; 
+        transform: translateY(-20px); 
+        max-height: 0;
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+        max-height: 2000px;
+      }
+    }
+
+    .info-panel h2 {
+      text-align: center;
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      margin-bottom: 20px;
+    }
+
+    .detail-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(46, 204, 113, 0.1);
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .detail-section h3 {
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-size: clamp(1.1rem, 3vw, 1.3rem);
+    }
+
+    .detail-section p {
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      line-height: 1.6;
+    }
+
+    .detail-section ul {
+      padding-left: 20px;
+    }
+
+    .detail-section li {
+      margin-bottom: 8px;
+      line-height: 1.5;
+      font-size: clamp(0.85rem, 2.3vw, 0.95rem);
+    }
+
+    /* AR Modal */
+    .ar-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      overflow-y: auto;
+    }
+
+    .ar-modal-content {
+      background-color: var(--card-dark);
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    body.light-theme .ar-modal-content {
+      background-color: var(--card-light);
+      color: var(--text-light);
+    }
+
+    .ar-modal-content h2 {
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      margin-bottom: 15px;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      cursor: pointer;
+      color: #aaa;
+    }
+
+    .close:hover {
+      color: white;
+    }
+
+    .qr-container {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 15px 0;
+      display: inline-block;
+    }
+
+    .qr-container p {
+      font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+      margin-top: 10px;
+    }
+
+    .ar-instructions {
+      background: rgba(231, 76, 60, 0.1);
+      padding: 15px;
+      border-radius: 12px;
+      margin: 15px 0;
+      border-left: 4px solid #e74c3c;
+      text-align: left;
+    }
+
+    .ar-instructions h4 {
+      color: #e74c3c;
+      margin-bottom: 12px;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+    }
+
+    .ar-instructions ol {
+      padding-left: 20px;
+    }
+
+    .ar-instructions li {
+      margin-bottom: 8px;
+      line-height: 1.5;
+      font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+    }
+
+    /* Media queries específicas */
+    @media (max-width: 480px) {
+      .header {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        min-height: 60px;
+      }
+
+      .main {
+        padding: 70px 10px 30px;
+      }
+
+      .btn {
+        font-size: 0.8rem;
+        padding: 8px 16px;
+        margin: 3px;
+      }
+
+      .audio-container {
+        gap: 5px;
+      }
+
+      .info-bubble {
+        left: 5px;
+        top: 25%;
+        max-width: 160px;
+        font-size: 0.7rem;
+      }
+
+      .ar-modal-content {
+        margin: 10px auto;
+        width: 95%;
+        height: calc(100vh - 20px);
+        max-height: none;
+        border-radius: 10px;
+      }
+
+      .detail-section {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .header {
+        padding: 6px 8px;
+      }
+
+      .logo {
+        font-size: 1rem;
+      }
+
+      .back {
+        font-size: 0.8rem;
+      }
+
+      #themeToggleSmall {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+      }
+
+      .main {
+        padding: 65px 8px 25px;
+      }
+
+      .info-card {
+        padding: 12px;
+      }
+
+      .model-container {
+        height: 250px;
+        border-radius: 10px;
+      }
+
+      .btn {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+      }
+
+      .info-bubble {
+        max-width: 140px;
+        padding: 6px 10px;
+        border-radius: 10px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .header {
+        padding: 15px 30px;
+      }
+
+      .main {
+        padding: 120px 20px 40px;
+      }
+
+      .audio-container {
+        gap: 10px;
+      }
+
+      .info-bubble {
+        left: 15px;
+        top: 40%;
+        max-width: 250px;
+      }
+
+      .ar-modal-content {
+        width: 80%;
+        max-width: 600px;
+      }
+    }
+
+    /* Ajustes para orientación landscape en móviles */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .model-container {
+        height: 200px;
+      }
+
+      .info-bubble {
+        top: 15%;
+        max-width: 120px;
+        font-size: 0.65rem;
+      }
+
+      .ar-modal-content {
+        margin: 2% auto;
+        max-height: 96vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo"><i class="fas fa-stomach"></i> AR Órganos</div>
+    <a href="oficial.html" class="back"><i class="fas fa-arrow-left"></i> Volver</a>
+    <button class="btn btn-primary" id="themeToggleSmall">Modo Claro</button>
+  </header>
+
+  <div class="main">
+    <h1>Sistema Urinario 3D</h1>
+    <div class="info-card">
+      <p>Explora la estructura completa del Sistema Urinario con esta visualización interactiva.</p>
+    </div>
+
+    <div class="model-container">
+      <!-- Burbuja flotante informativa -->
+      <div class="info-bubble">
+        <h3><i class="fas fa-stomach"></i> Sistema Urinario</h3>
+        <p>El aparato urinario humano es un conjunto de órganos encargados de la producción, almacenamiento y expulsión de la orina.  </p>
+      </div>
+
+      <model-viewer
+        src="Sistema urinario/Sistema urinario.glb"
+        alt="Modelo 3D del Sistema Urinario"
+        auto-rotate
+        camera-controls
+        ar
+        shadow-intensity="1"
+        ar-modes="scene-viewer webxr quick-look"
+        ar-scale="auto"
+        camera-orbit="0deg 75deg 105%"
+        min-camera-orbit="auto auto auto"
+        max-camera-orbit="auto auto auto"
+        ios-src="Sistema endocrinario"
+        ar-placement="floor"
+        loading="eager"
+      ></model-viewer>
+    </div>
+
+    <div class="audio-container">
+      <audio id="sistema_digestivo" src="Audios oficiales/Sistema urinario/Sistema urinario.mp3"></audio>
+      <button class="btn btn-audio" onclick="toggleAudio()">
+        <i class="fas fa-play"></i> Reproducir Audio
+      </button>
+      <button class="btn btn-info" onclick="toggleInfoPanel()">
+        <i class="fas fa-info-circle"></i> Información Detallada
+      </button>
+      <button class="btn btn-ar" onclick="showARModal()">
+        <i class="fas fa-cube"></i> Ver en AR
+      </button>
+    </div>
+
+    <!-- Panel de información desplegable -->
+<div id="infoPanel" class="info-panel">
+  <h2><i class="fas fa-toilet"></i> Sistema Urinario</h2>
+
+  <div class="detail-section">
+    <h3>Información General</h3>
+    <p>El sistema urinario incluye los riñones, uréteres, vejiga y uretra, y se encarga de producir, almacenar y eliminar la orina del cuerpo.</p>
+  </div>
+
+  <div class="detail-section">
+    <h3>Funciones Principales</h3>
+    <ul>
+      <li><strong>Eliminación de desechos:</strong> Expulsa toxinas y productos metabólicos.</li>
+      <li><strong>Regulación de fluidos:</strong> Controla el volumen y composición de los fluidos corporales.</li>
+      <li><strong>Equilibrio de pH:</strong> Ayuda a mantener el pH de la sangre.</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <h3>Órganos Principales</h3>
+    <ul>
+      <li><strong>Riñones:</strong> Filtran la sangre y producen orina.</li>
+      <li><strong>Vejiga:</strong> Almacena la orina hasta su eliminación.</li>
+      <li><strong>Uréteres:</strong> Transportan la orina desde los riñones a la vejiga.</li>
+      <li><strong>Uretra:</strong> Expulsa la orina al exterior.</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <h3>Datos Curiosos</h3>
+    <ul>
+      <li>La vejiga puede contener hasta 500 ml de orina en adultos.</li>
+      <li>La orina es estéril al salir de los riñones.</li>
+      <li>El color de la orina puede indicar el nivel de hidratación del cuerpo.</li>
+    </ul>
+  </div>
+</div>
+
+  <!-- Modal de Realidad Aumentada -->
+  <div id="arModal" class="ar-modal">
+    <div class="ar-modal-content">
+      <span class="close" onclick="closeARModal()">&times;</span>
+      <h2><i class="fas fa-cube"></i> Realidad Aumentada</h2>
+      
+      <div class="ar-instructions">
+        <h4>Instrucciones para Google AR:</h4>
+        <ol>
+          <li><strong>Android con Google AR:</strong> Toca el botón AR en el modelo 3D para abrir en Google Scene Viewer</li>
+          <li><strong>Requisitos Android:</strong> Android 7.0+, Google Play Services for AR instalado</li>
+          <li><strong>iPhone/iPad:</strong> Se abrirá en Quick Look de Apple</li>
+          <li><strong>Navegador recomendado:</strong> Chrome en Android para mejor compatibilidad con Google AR</li>
+          <li><strong>Permisos:</strong> Permite el acceso a la cámara cuando se solicite</li>
+        </ol>
+      </div>
+
+      <div class="qr-container">
+        <div id="qrcode"></div>
+        <p><strong>Escanea este código QR</strong><br>para acceder desde tu móvil</p>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button class="btn btn-primary" onclick="launchAR()">
+          <i class="fas fa-mobile-alt"></i> Abrir Google AR
+        </button>
+        <button class="btn btn-info" onclick="checkARSupport()">
+          <i class="fas fa-question-circle"></i> Verificar Compatibilidad
+        </button>
+        <button class="btn btn-ar" onclick="installGoogleAR()">
+          <i class="fas fa-download"></i> Instalar Google AR
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script>
+    const audio = document.getElementById("sistema_digestivo");
+    const audioBtn = document.querySelector(".btn-audio");
+
+    function toggleAudio() {
+      if (audio.paused) {
+        audio.play();
+        audioBtn.innerHTML = '<i class="fas fa-pause"></i> Pausar Audio';
+      } else {
+        audio.pause();
+        audioBtn.innerHTML = '<i class="fas fa-play"></i> Reproducir Audio';
+      }
+    }
+
+    // Resetear botón cuando termine el audio
+    audio.addEventListener('ended', function() {
+      audioBtn.innerHTML = '<i class="fas fa-play"></i> Reproducir Audio';
+    });
+
+    const toggleTheme = document.getElementById("themeToggleSmall");
+    toggleTheme.addEventListener("click", () => {
+      document.body.classList.toggle("light-theme");
+      toggleTheme.textContent =
+        document.body.classList.contains("light-theme")
+          ? "Modo Oscuro"
+          : "Modo Claro";
+    });
+
+    // Funciones del panel de información
+    function toggleInfoPanel() {
+      const panel = document.getElementById("infoPanel");
+      const btn = document.querySelector(".btn-info");
+      
+      if (panel.classList.contains("show")) {
+        panel.classList.remove("show");
+        btn.innerHTML = '<i class="fas fa-info-circle"></i> Información Detallada';
+      } else {
+        panel.classList.add("show");
+        btn.innerHTML = '<i class="fas fa-times-circle"></i> Ocultar Información';
+      }
+    }
+
+    // Funciones del modal de AR
+    function showARModal() {
+      document.getElementById("arModal").style.display = "block";
+      generateQR();
+    }
+
+    function closeARModal() {
+      document.getElementById("arModal").style.display = "none";
+    }
+
+    // Generar código QR
+    function generateQR() {
+      const currentURL = window.location.href;
+      const qr = new QRious({
+        element: document.getElementById('qrcode'),
+        value: currentURL,
+        size: 200,
+        backgroundAlpha: 0,
+        foreground: '#2ecc71',
+        level: 'M'
+      });
+    }
+
+    // Lanzar Google AR
+    function launchAR() {
+      const modelViewer = document.querySelector('model-viewer');
+      
+      // Detectar si es Android para usar Google AR
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isAndroid) {
+        // Intentar abrir con Google Scene Viewer (Google AR)
+        if (modelViewer && modelViewer.canActivateAR) {
+          modelViewer.activateAR();
+        } else {
+          // Fallback: intentar abrir directamente Scene Viewer
+          const modelUrl = modelViewer.src;
+          const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.location.origin + '/' + modelUrl)}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`;
+          window.location.href = sceneViewerUrl;
+        }
+      } else if (isIOS) {
+        // Para iOS usar Quick Look
+        if (modelViewer && modelViewer.canActivateAR) {
+          modelViewer.activateAR();
+        } else {
+          alert('AR no está disponible en este dispositivo iOS. Asegúrate de usar Safari.');
+        }
+      } else {
+        alert('Para la mejor experiencia AR, usa Chrome en Android con Google Play Services for AR instalado, o Safari en iOS.');
+      }
+    }
+
+    // Verificar soporte específico de Google AR
+    function checkARSupport() {
+      const modelViewer = document.querySelector('model-viewer');
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isChrome = /Chrome/i.test(navigator.userAgent);
+      
+      let message = 'Estado de compatibilidad Google AR:\n\n';
+      
+      if (isAndroid) {
+        message += '📱 Dispositivo: Android detectado\n';
+        if (isChrome) {
+          message += '✅ Navegador: Chrome (recomendado)\n';
+        } else {
+          message += '⚠️ Navegador: Se recomienda Chrome\n';
+        }
+        message += '📋 Requisitos para Google AR:\n';
+        message += '• Android 7.0 o superior\n';
+        message += '• Google Play Services for AR\n';
+        message += '• Dispositivo compatible con ARCore\n';
+      } else if (isIOS) {
+        message += '📱 Dispositivo: iOS detectado\n';
+        message += '✅ Usará Quick Look de Apple\n';
+        message += '📋 Requisitos:\n';
+        message += '• iOS 12 o superior\n';
+        message += '• Safari recomendado\n';
+      } else {
+        message += '❌ Dispositivo no móvil detectado\n';
+        message += '📋 Para AR necesitas:\n';
+        message += '• Dispositivo móvil (Android/iOS)\n';
+      }
+      
+      if ('xr' in navigator) {
+        message += '\n✅ WebXR API disponible';
+      } else {
+        message += '\n❌ WebXR API no disponible';
+      }
+      
+      if (modelViewer && modelViewer.canActivateAR) {
+        message += '\n✅ AR activable en este dispositivo';
+      } else {
+        message += '\n⚠️ AR puede no estar disponible';
+      }
+      
+      alert(message);
+    }
+
+    // Cerrar modales al hacer clic fuera
+    window.onclick = function(event) {
+      const arModal = document.getElementById("arModal");
+      
+      if (event.target == arModal) {
+        closeARModal();
+      }
+    }
+
+    // Detectar soporte AR al cargar
+    window.addEventListener('load', function() {
+      const modelViewer = document.querySelector('model-viewer');
+      
+      // Agregar evento para cuando AR esté listo
+      modelViewer.addEventListener('ar-status', function(event) {
+        console.log('AR Status:', event.detail.status);
+      });
+
+      // Detectar si Google Play Services for AR está disponible
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      if (isAndroid) {
+        // Intentar detectar ARCore
+        modelViewer.addEventListener('load', function() {
+          console.log('Model loaded, checking ARCore support...');
+        });
+      }
+    });
+
+    // Función para instalar Google AR
+    function installGoogleAR() {
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
+      if (isAndroid) {
+        // Redirigir a Google Play Store para instalar Google Play Services for AR
+        const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.google.ar.core';
+        window.open(playStoreUrl, '_blank');
+      } else {
+        alert('Google Play Services for AR solo está disponible en dispositivos Android. En iOS se usa AR Kit automáticamente.');
+      }
+    }
+  </script>
+</body>
+</html>

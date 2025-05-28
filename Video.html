@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AR Anatomía - Videos de Sistemas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <style>
+    :root {
+      --primary: #2ecc71;
+      --secondary: #3498db;
+      --accent: #fdd835;
+      --bg-dark: #121212;
+      --bg-light: #ffffff;
+      --card-dark: #1e1e1e;
+      --card-light: #f9f9f9;
+      --text-dark: #f5f5f5;
+      --text-light: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Poppins, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-dark);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    body.light-theme {
+      background: var(--bg-light);
+      color: var(--text-light);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: rgba(0, 0, 0, 0.7);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    body.light-theme .header {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .logo {
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      font-weight: 600;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+    }
+
+    .back {
+      color: inherit;
+      text-decoration: none;
+      font-size: clamp(0.8rem, 3vw, 1rem);
+      white-space: nowrap;
+    }
+
+    #themeToggleSmall {
+      font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+      padding: 6px 12px;
+      white-space: nowrap;
+    }
+
+    .main {
+      padding: 80px 15px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .main h1 {
+      font-size: clamp(1.8rem, 6vw, 2.5rem);
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      word-wrap: break-word;
+    }
+
+    .info-card {
+      background: var(--card-dark);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      margin: 15px 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.light-theme .info-card {
+      background: var(--card-light);
+      color: var(--text-light);
+    }
+
+    .info-card p {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      line-height: 1.5;
+    }
+
+    .enable-audio {
+      margin: 10px auto;
+      padding: 10px 20px;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .enable-audio:hover {
+      transform: scale(1.05);
+    }
+
+    .enable-audio.hidden {
+      display: none;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .video-section {
+      background: var(--card-dark);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      transition: background 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    body.light-theme .video-section {
+      background: var(--card-light);
+      color: var(--text-light);
+    }
+
+    .video-section h2 {
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s;
+      overflow: hidden;
+    }
+
+    .video-container:hover {
+      transform: scale(1.02);
+    }
+
+    .video-container video {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+
+    .video-container .error-message,
+    .video-container .autoplay-blocked {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #e74c3c;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      text-align: center;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .video-container.error .error-message,
+    .video-container.autoplay-blocked .autoplay-blocked {
+      display: block;
+    }
+
+    .video-description {
+      margin-top: 10px;
+      font-size: clamp(0.85rem, 2.3vw, 0.95rem);
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+
+    .detail-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(46, 204, 113, 0.1);
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .detail-section p {
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      line-height: 1.6;
+    }
+
+    .btn {
+      padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+      margin: 5px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      font-weight: 500;
+      transition: background 0.3s, color 0.3s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: fit-content;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        min-height: 60px;
+      }
+
+      .main {
+        padding: 70px 10px 30px;
+      }
+
+      .btn {
+        font-size: 0.8rem;
+        padding: 8px 16px;
+        margin: 3px;
+      }
+
+      .video-section {
+        padding: 15px;
+      }
+
+      .video-section h2 {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .header {
+        padding: 6px 8px;
+      }
+
+      .logo {
+        font-size: 1rem;
+      }
+
+      .back {
+        font-size: 0.8rem;
+      }
+
+      #themeToggleSmall {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+      }
+
+      .main {
+        padding: 65px 8px 25px;
+      }
+
+      .info-card {
+        padding: 12px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .header {
+        padding: 15px 30px;
+      }
+
+      .main {
+        padding: 120px 20px 40px;
+      }
+
+      .video-section {
+        padding: 25px;
+      }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      .main {
+        padding: 60px 10px 20px;
+      }
+
+      .video-grid {
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo"><i class="fas fa-video"></i> AR Órganos</div>
+    <a href="oficial.html" class="back"><i class="fas fa-arrow-left"></i> Volver</a>
+    <button class="btn btn-primary" id="themeToggleSmall">Modo Claro</button>
+  </header>
+
+  <div class="main">
+    <h1>Videos de Sistemas Biológicos</h1>
+    <div class="info-card">
+      <p>Explora videos educativos en español sobre los 12 sistemas del cuerpo humano.</p>
+      <button class="enable-audio" id="enableAudio">Habilitar Sonido</button>
+    </div>
+
+    <div class="video-grid">
+      <div class="video-section">
+        <h2><i class="fas fa-brain"></i> Sistema Nervioso</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema nervioso.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Explicación del sistema nervioso, incluyendo cerebro, médula espinal y nervios periféricos.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-heart"></i> Sistema Circulatorio</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema circulatorio.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Video sobre el corazón, vasos sanguíneos y circulación de la sangre.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-lungs"></i> Sistema Respiratorio</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema respiratorio.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Descripción de los pulmones y el proceso de respiración.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-utensils"></i> Sistema Digestivo</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema digestivo.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Explicación del proceso digestivo desde la boca hasta el intestino.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-bone"></i> Sistema Esquelético</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema esqueletico.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Video sobre la estructura y funciones de los huesos.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-running"></i> Sistema Muscular</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema muscular.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Descripción de los músculos y su rol en el movimiento y soporte.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-vial"></i> Sistema Endócrino</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema endocrino.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Explicación de las glándulas y hormonas del sistema endócrino.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-kidney"></i> Sistema Urinario</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema urinario.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Video sobre los riñones y la eliminación de desechos.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-venus-mars"></i> Sistema Reproductor</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Aparato reproductor masculino y femenino.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Descripción general del sistema reproductor humano.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-shield-alt"></i> Sistema tegumentario</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema tengumentrio.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Explicación de la piel, cabello y uñas como parte del sistema tegumentario.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-shield-virus"></i> Sistema Inmunológico</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema inmunitario.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Video sobre cómo el sistema inmunológico protege contra enfermedades.</p>
+      </div>
+
+      <div class="video-section">
+        <h2><i class="fas fa-stream"></i> Sistema Linfático</h2>
+        <div class="video-container">
+          <video playsinline>
+            <source src="Videos/Sistema linfático.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+          </video>
+          <p class="error-message">No se pudo cargar el video. Verifica que el archivo exista.</p>
+          <p class="autoplay-blocked">Haz clic para reproducir con sonido.</p>
+        </div>
+        <p class="video-description">Descripción del sistema linfático y su rol en la inmunidad y drenaje.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleTheme = document.getElementById("themeToggleSmall");
+      const enableAudioButton = document.getElementById("enableAudio");
+      const videoContainers = document.querySelectorAll('.video-container');
+      let activeVideo = null;
+      let audioEnabled = false;
+
+      // Theme toggle
+      toggleTheme.addEventListener("click", () => {
+        document.body.classList.toggle("light-theme");
+        toggleTheme.textContent = document.body.classList.contains("light-theme")
+          ? "Modo Oscuro"
+          : "Modo Claro";
+      });
+
+      // Enable audio on user interaction
+      enableAudioButton.addEventListener('click', () => {
+        audioEnabled = true;
+        enableAudioButton.classList.add('hidden');
+        // Test autoplay with audio
+        const testVideo = document.createElement('video');
+        const playPromise = testVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            videoContainers.forEach(container => {
+              container.classList.add('autoplay-blocked');
+            });
+          });
+        }
+      });
+
+      // Video hover handling
+      videoContainers.forEach(container => {
+        const video = container.querySelector('video');
+
+        // Check for video load errors
+        video.addEventListener('error', () => {
+          container.classList.add('error');
+        });
+
+        // Remove autoplay-blocked message on click
+        video.addEventListener('click', () => {
+          if (container.classList.contains('autoplay-blocked')) {
+            container.classList.remove('autoplay-blocked');
+            video.play().catch(() => {
+              container.classList.add('autoplay-blocked');
+            });
+          }
+        });
+
+        container.addEventListener('mouseenter', () => {
+          if (!audioEnabled) {
+            container.classList.add('autoplay-blocked');
+            return;
+          }
+          // Pause any currently playing video
+          if (activeVideo && activeVideo !== video) {
+            activeVideo.pause();
+            activeVideo.currentTime = 0;
+          }
+          // Play new video
+          video.play().catch(() => {
+            container.classList.add('autoplay-blocked');
+          });
+          activeVideo = video;
+        });
+
+        container.addEventListener('mouseleave', () => {
+          video.pause();
+          video.currentTime = 0;
+          if (activeVideo === video) {
+            activeVideo = null;
+          }
+          container.classList.remove('autoplay-blocked');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
