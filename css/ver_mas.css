@@ -1,0 +1,477 @@
+:root {
+  --primary-color: #2980b9;
+  --primary-color-dark: #1c638b;
+  --secondary-color: #27ae60;
+  --accent-color: #e74c3c;
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --surface-color: #2c2c2c;
+  --text-color: #f0f0f0;
+  --text-secondary: #aaaaaa;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle, #222, var(--background-color));
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.models-section h2 {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+  display: inline-block;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.models-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+}
+
+.models-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.model-card {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.model-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.model-preview {
+  height: 120px;
+  background-color: var(--surface-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.model-preview model-viewer {
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+}
+
+.model-info {
+  padding: 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.model-info h3 {
+  font-size: 1rem;
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.model-info p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  flex-grow: 1;
+}
+
+.model-actions {
+  border-top: 1px solid var(--surface-color);
+  padding: 10px;
+  text-align: center;
+}
+
+.explore-button {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  transition: background-color 0.3s ease;
+}
+
+.explore-button:hover {
+  background: linear-gradient(45deg, var(--primary-color-dark), var(--secondary-color));
+}
+
+/* Estilo del botón "Volver" alineado a la derecha */
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: var(--surface-color);
+  color: white;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: clamp(0.8rem, 3vw, 1rem);
+  transition: background 0.3s, transform 0.2s;
+  float: right;
+  margin-bottom: 20px;
+  margin-top: 15px;
+}
+
+.back:hover {
+  background-color: #333;
+  transform: scale(1.05);
+}
+
+:root {
+  --primary-color: #2980b9;
+  --primary-color-dark: #1c638b;
+  --secondary-color: #27ae60;
+  --accent-color: #e74c3c;
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --surface-color: #2c2c2c;
+  --text-color: #f0f0f0;
+  --text-secondary: #aaaaaa;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ FavIcon {
+  width: 32px;
+  height: 32px;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle, #222, var(--background-color));
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.models-section h2 {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+  display: inline-block;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.models-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+}
+
+.models-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.model-card {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.model-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.model-preview {
+  height: 120px;
+  background-color: var(--surface-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.model-preview model-viewer {
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+}
+
+.model-info {
+  padding: 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.model-info h3 {
+  font-size: 1rem;
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.model-info p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  flex-grow: 1;
+}
+
+.model-actions {
+  border-top: 1px solid var(--surface-color);
+  padding: 10px;
+  text-align: center;
+}
+
+.explore-button {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  transition: background-color 0.3s ease;
+}
+
+.explore-button:hover {
+  background: linear-gradient(45deg, var(--primary-color-dark), var(--secondary-color));
+}
+
+/* Estilo del contenedor de búsqueda */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--card-background);
+  border-radius: 50px;
+  padding: 5px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  margin: 20px auto;
+  max-width: 500px;
+  border: 2px solid transparent;
+}
+
+.search-container:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  border-color: var(--primary-color);
+}
+
+.search-container:focus-within {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.2);
+}
+
+/* Campo de entrada */
+.search-input {
+  border: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 16px;
+  padding: 12px 15px 12px 50px;
+  width: 100%;
+  outline: none;
+  height: 50px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+/* Icono de búsqueda */
+.search-icon {
+  position: absolute;
+  left: 15px;
+  width: 20px;
+  height: 20px;
+  fill: var(--primary-color);
+  transition: all 0.3s ease;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.search-container:focus-within .search-icon {
+  fill: var(--secondary-color);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Botón de búsqueda principal */
+.search-button {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  margin-left: 5px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  height: 50px;
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.search-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.search-button:hover {
+  background: linear-gradient(45deg, var(--primary-color-dark), var(--secondary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.search-button:hover::before {
+  left: 100%;
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-container {
+    max-width: 100%;
+  }
+}
+
+:root {
+  --primary-color: #2980b9;
+  --primary-color-dark: #1c638b;
+  --secondary-color: #27ae60;
+  --accent-color: #e74c3c;
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --surface-color: #2c2c2c;
+  --text-color: #f0f0f0;
+  --text-secondary: #aaaaaa;
+}
+/* Overrides para modo claro */
+body.light-theme {
+  --background-color: #f9f9f9;
+  --card-background: #ffffff;
+  --surface-color: #eeeeee;
+  --text-color: #333333;
+  --text-secondary: #555555;
+}
+
+* {
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  scroll-behavior: smooth;
+}
+
+body { 
+  font-family: "Poppins", sans-serif; 
+  background-color: var(--background-color); 
+  color: var(--text-color); 
+  line-height: 1.6; 
+  overflow-x: hidden;
+}
+
+.container { 
+  max-width: 1300px; 
+  margin: 0 auto; 
+  padding: 0 20px; 
+}
+
+/* ... (resto del CSS existente permanece sin cambios) ... */
+
+/* Estilos para el botón Volver */
+.volver-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: none;
+  color: var(--text-color);
+  border: 1px solid var(--text-color);
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.volver-button:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
